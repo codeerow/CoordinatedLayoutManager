@@ -14,7 +14,7 @@ import kotlin.math.abs
 class CoordinatedLayoutManager(private val coordinator: Coordinator) : AbstractLayoutManager() {
 
 
-    override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
+    override fun onLayoutChildren(recycler: Recycler, state: RecyclerView.State) {
         Log.d("TEST", "onLayoutChildren")
         removeAllViews()
         if (itemCount == 0) return
@@ -123,18 +123,22 @@ class CoordinatedLayoutManager(private val coordinator: Coordinator) : AbstractL
     }
 
     private fun recycleTopIfNeeded(firstView: View, recycler: Recycler) {
-        if (!coordinator.isFirstPosition(firstView.positionInParent())) {
+        if (coordinator.isFirstPosition(firstView.positionInParent()) &&
+            firstVisiblePosition + 1 < lastVisiblePosition
+        ) {
             removeView(firstView)
-            recycler.recycleView(firstView)
             ++firstVisiblePosition
+            recycler.recycleView(firstView)
         }
     }
 
     private fun recycleBottomIfNeeded(lastView: View, recycler: Recycler) {
-        if (!coordinator.isLastPosition(lastView.positionInParent())) {
+        if (coordinator.isLastPosition(lastView.positionInParent()) &&
+            lastVisiblePosition - 1 > firstVisiblePosition
+        ) {
             removeView(lastView)
-            recycler.recycleView(lastView)
             --lastVisiblePosition
+            recycler.recycleView(lastView)
         }
     }
 }
