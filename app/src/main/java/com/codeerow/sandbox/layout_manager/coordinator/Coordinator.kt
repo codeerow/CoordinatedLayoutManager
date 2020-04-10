@@ -8,9 +8,7 @@ interface Coordinator {
     val startPosition: Point
     val lastPosition: Point
 
-    fun nextPosition(currentPosition: Point, delta: Int): Point?
-
-    fun positionFor(index: Int): Point?
+    fun calculatePosition(currentPosition: Point, delta: Int): Point?
 
     fun nextPosition(currentPosition: Point?): Point?
     fun prevPosition(currentPosition: Point): Point?

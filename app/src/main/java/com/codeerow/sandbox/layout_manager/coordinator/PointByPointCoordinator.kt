@@ -9,7 +9,7 @@ class PointByPointCoordinator(private val positions: List<Point>) : Coordinator 
     override val startPosition: Point = positions.first()
     override val lastPosition: Point = positions.last()
 
-    override fun nextPosition(currentPosition: Point, delta: Int): Point? {
+    override fun calculatePosition(currentPosition: Point, delta: Int): Point? {
         var currentIndex = positions.indexOf(currentPosition)
         Log.d("currentIndex", currentIndex.toString())
         return if (delta < 0) {
@@ -25,10 +25,6 @@ class PointByPointCoordinator(private val positions: List<Point>) : Coordinator 
         var currentIndex = positions.indexOf(currentPosition)
         return if (currentIndex == -1 || currentIndex >= positions.size - 1) null
         else positions[++currentIndex]
-    }
-
-    override fun positionFor(index: Int): Point? {
-        return positions.getOrNull(index)
     }
 
     override fun prevPosition(currentPosition: Point): Point? {
