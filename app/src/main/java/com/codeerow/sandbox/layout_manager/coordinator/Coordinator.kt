@@ -5,15 +5,10 @@ import android.graphics.Point
 
 interface Coordinator {
 
-    val startPosition: Point
-    val lastPosition: Point
+    val initialPosition: Point
+    
+    fun shiftPosition(currentPosition: Point, delta: Double): Point
 
-    fun calculatePosition(currentPosition: Point, delta: Int): Point?
-
-    fun nextPosition(currentPosition: Point?): Point?
-    fun prevPosition(currentPosition: Point): Point?
-
-    fun isFirstPosition(point: Point?): Boolean
-    fun isLastPosition(point: Point?): Boolean
+    fun isBoundsReached(point: Point, delta: Double): Boolean
 }
 
