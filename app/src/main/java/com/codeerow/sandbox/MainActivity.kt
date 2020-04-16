@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.codeerow.sandbox.circle_list.CircleAdapter
 import com.codeerow.sandbox.layout_manager.CoordinatedLayoutManager
-import com.codeerow.sandbox.layout_manager.coordinator.CircleCoordinator
+import com.codeerow.sandbox.layout_manager.coordinator.TableCoordinator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.PI
 
@@ -33,16 +33,17 @@ class MainActivity : AppCompatActivity() {
 //                    Point(750, 550)
 //                )
 //            )
-            val width = 1080
             val height = 1920
-            val circleCoordinator = CircleCoordinator(
-                startDelta = 0.0,
-                endDelta = PI / 4,
-                centerPosition = Point(width / 2, height / 2),
-                radius = 400.0
+            val circleCoordinator = TableCoordinator(
+                width = 700,
+                height = 1000,
+                initialPosition = Point(200, height)
             )
-            layoutManager = CoordinatedLayoutManager(circleCoordinator, itemMargin = 100.0)
+            layoutManager = CoordinatedLayoutManager(circleCoordinator, itemMargin = 167)
             adapter = CircleAdapter(List(1) { 1 })
+            setOnTouchListener { view, motionEvent ->
+                false
+            }
         }
     }
 }

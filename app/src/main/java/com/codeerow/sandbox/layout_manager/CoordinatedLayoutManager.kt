@@ -12,7 +12,7 @@ import com.codeerow.sandbox.layout_manager.utils.positionInParent
 
 class CoordinatedLayoutManager(
     private val coordinator: Coordinator,
-    private val itemMargin: Double
+    private val itemMargin: Int
 ) :
     RecyclerView.LayoutManager() {
 
@@ -39,16 +39,18 @@ class CoordinatedLayoutManager(
         lastVisiblePosition = 0
         firstVisiblePosition = 0
 
-        var currentPoint: Point = coordinator.initialPosition
-        do {
-            val view = recycler.getViewForPosition(lastVisiblePosition)
-            addView(view)
-            layoutView(view, currentPoint)
-            currentPoint = coordinator.shiftPosition(currentPoint, itemMargin)
-            lastVisiblePosition++
-        } while (!coordinator.isBoundsReached(currentPoint, itemMargin)
-            && lastVisiblePosition < itemCount
-        )
+        with(coordinator) {
+            var currentPoint: Point = initialPosition
+            do {
+                val view = recycler.getViewForPosition(lastVisiblePosition)
+                addView(view)
+                layoutView(view, currentPoint)
+                currentPoint = currentPoint.shiftPosition(itemMargin)
+                lastVisiblePosition++
+            } while (!currentPoint.isBoundsReached(itemMargin)
+                && lastVisiblePosition < itemCount
+            )
+        }
     }
 
     private fun layoutView(view: View, currentPoint: Point) {
@@ -77,16 +79,19 @@ class CoordinatedLayoutManager(
         } else scrollBy(dy, recycler)
     }
 
-    private fun scrollBy(delta: Int, recycler: Recycler): Int {
+    private fun scrollBy(delta: Int, recycler: Recycler): Int = with(coordinator) {
+        Log.d("TEST1", "dy: $delta")
         for (i in 0 until childCount) {
             getChildAt(i)?.let { view ->
                 val viewPosition = view.positionInParent()
-                if (!coordinator.isBoundsReached(viewPosition, delta.toDouble())) {
-                    val newPosition = coordinator.shiftPosition(viewPosition, delta.toDouble())
+                if (!viewPosition.isBoundsReached(delta)) {
+                    val newPosition = viewPosition.shiftPosition(delta)
                     view.moveTo(newPosition)
                 } else {
-                    removeView(view)
-                    recycler.recycleView(view)
+                    if (firstVisiblePosition != 0) {
+                        removeView(view)
+                        recycler.recycleView(view)
+                    }
 //                    if (delta < 0) {
 //                        ++firstVisiblePosition
 //                    } else {

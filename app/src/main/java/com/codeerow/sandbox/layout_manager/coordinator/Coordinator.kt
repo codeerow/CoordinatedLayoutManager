@@ -6,9 +6,9 @@ import android.graphics.Point
 interface Coordinator {
 
     val initialPosition: Point
-    
-    fun shiftPosition(currentPosition: Point, delta: Double): Point
 
-    fun isBoundsReached(point: Point, delta: Double): Boolean
+    fun Point.shiftPosition(delta: Int): Point
+
+    fun Point.isBoundsReached(delta: Int): Boolean
 }
 
