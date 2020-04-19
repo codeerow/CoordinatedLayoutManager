@@ -54,15 +54,15 @@ class TableCoordinator(
     private fun isOnLeftSide(pathLength: Int): Boolean = pathLength <= pathLengthTillArc
     private fun isOnRightSide(pathLength: Int): Boolean = pathLength >= pathLengthTillRightSide
 
+    private fun Point.isOnLeftSide(): Boolean = this.x == leftSideToCirclePoint.x
+    private fun Point.isOnRightSide(): Boolean = this.x == rightSideToCirclePoint.x
+
 
     override fun Point.shiftPosition(delta: Int): Point {
-        val currentPathLength = calculateCurrentPath(delta)
-        Log.d("TEST1", "currentPathLength: $currentPathLength")
+        val currentPathLength = calculateCurrentPath() - delta
         return when {
             isOnLeftSide(currentPathLength) -> shiftAlongLeftSide(currentPathLength)
-            isOnRightSide(currentPathLength) -> {
-                shiftAlongRightSide(currentPathLength - oneSidePathLength - arcPathLength)
-            }
+            isOnRightSide(currentPathLength) -> shiftAlongRightSide(currentPathLength - oneSidePathLength - arcPathLength)
             else -> shiftAlongCircle(currentPathLength - oneSidePathLength + arcPathLength)
         }
     }
@@ -72,7 +72,6 @@ class TableCoordinator(
     }
 
     private fun shiftAlongRightSide(delta: Int) = Point(rightSideToCirclePoint).apply {
-        Log.d("TEST1", "delta: $delta")
         y += delta
     }
 
@@ -85,17 +84,26 @@ class TableCoordinator(
     }
 
 
-    private fun Point.calculateCurrentPath(delta: Int): Int {
-        val currentPointPath = when (this.x) {
+    private fun Point.calculateCurrentPath(): Int {
+        return when {
             // we on the left side our path consist of initial y - current y
-            leftSideToCirclePoint.x -> initialPosition.y - y
+            isOnLeftSide() -> initialPosition.y - y
             // we on the right side our path consist of
             // one side + arc path + initial y - current y (because initial y = end y)
-            rightSideToCirclePoint.x -> oneSidePathLength + arcPathLength + (oneSidePathLength - (initialPosition.y - y))
+            isOnRightSide() -> oneSidePathLength + arcPathLength + (oneSidePathLength - (initialPosition.y - y))
             // we on the arc, out path is left side length + arc for curr point
-            else -> oneSidePathLength + calculateArcLength(this.angle(centerPoint = circleCenterPoint)) - arcPathLength
+            else -> oneSidePathLength + calculateArcLength(angle(this, circleCenterPoint)) -
+                    arcPathLength
         }
-        return currentPointPath - delta
+    }
+
+
+    fun calculateRotation(point: Point): Float = with(point) {
+        return when {
+            isOnLeftSide() -> -90f
+            isOnRightSide() -> 90f
+            else -> angle(this, circleCenterPoint) - 270f
+        }
     }
 
 

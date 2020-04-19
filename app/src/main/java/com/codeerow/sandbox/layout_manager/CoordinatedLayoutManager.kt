@@ -10,11 +10,10 @@ import com.codeerow.sandbox.layout_manager.utils.moveTo
 import com.codeerow.sandbox.layout_manager.utils.positionInParent
 
 
-class CoordinatedLayoutManager(
+open class CoordinatedLayoutManager(
     private val coordinator: Coordinator,
     private val itemMargin: Int
-) :
-    RecyclerView.LayoutManager() {
+) : RecyclerView.LayoutManager() {
 
     private var firstVisiblePosition: Int = 0
     private var lastVisiblePosition: Int = 0
@@ -53,7 +52,7 @@ class CoordinatedLayoutManager(
         }
     }
 
-    private fun layoutView(view: View, currentPoint: Point) {
+    open fun layoutView(view: View, currentPoint: Point) {
         measureChildWithMargins(view, 0, 0)
 
         val measuredWidth = getDecoratedMeasuredWidth(view)
@@ -80,13 +79,12 @@ class CoordinatedLayoutManager(
     }
 
     private fun scrollBy(delta: Int, recycler: Recycler): Int = with(coordinator) {
-        Log.d("TEST1", "dy: $delta")
         for (i in 0 until childCount) {
             getChildAt(i)?.let { view ->
                 val viewPosition = view.positionInParent()
                 if (!viewPosition.isBoundsReached(delta)) {
                     val newPosition = viewPosition.shiftPosition(delta)
-                    view.moveTo(newPosition)
+                    layoutView(view, newPosition)
                 } else {
                     if (firstVisiblePosition != 0) {
                         removeView(view)
@@ -103,63 +101,4 @@ class CoordinatedLayoutManager(
         return delta
     }
 
-
-//    private fun performRecycling(
-//        delta: Int,
-//        firstView: View?,
-//        lastView: View?,
-//        recycler: Recycler
-//    ) {
-//        if (delta < 0) {
-//            /** Scroll down */
-//            firstView?.let { recycleTopIfNeeded(firstView, recycler) }
-//            lastView?.let { addToBottomIfNeeded(lastView, recycler) }
-//        } else {
-//            /** Scroll up */
-//            lastView?.let { recycleBottomIfNeeded(lastView, recycler) }
-//            firstView?.let { addTopIfNeeded(firstView, recycler) }
-//        }
-//    }
-//
-//    private fun addToBottomIfNeeded(lastView: View, recycler: Recycler) {
-//        if (!coordinator.isEndReached(lastView.positionInParent())) {
-//            if (lastVisiblePosition < itemCount) {
-//                val newLastView = recycler.getViewForPosition(lastVisiblePosition)
-//                addView(newLastView)
-//                layoutView(newLastView, coordinator.nextPosition(lastView.positionInParent()))
-//                ++lastVisiblePosition
-//            }
-//        }
-//    }
-//
-//    private fun addTopIfNeeded(firstView: View, recycler: Recycler) {
-//        if (!coordinator.isStartReached(firstView.positionInParent())) {
-//            if (firstVisiblePosition > 0) {
-//                val newFirstView = recycler.getViewForPosition(firstVisiblePosition - 1)
-//                addView(newFirstView, 0)
-//                layoutView(newFirstView, coordinator.prevPosition(firstView.positionInParent()))
-//                --firstVisiblePosition
-//            }
-//        }
-//    }
-//
-//    private fun recycleTopIfNeeded(firstView: View, recycler: Recycler) {
-//        if (coordinator.isStartReached(firstView.positionInParent()) &&
-//            firstVisiblePosition + 1 < lastVisiblePosition
-//        ) {
-//            removeView(firstView)
-//            ++firstVisiblePosition
-//            recycler.recycleView(firstView)
-//        }
-//    }
-//
-//    private fun recycleBottomIfNeeded(lastView: View, recycler: Recycler) {
-//        if (coordinator.isEndReached(lastView.positionInParent()) &&
-//            lastVisiblePosition - 1 > firstVisiblePosition
-//        ) {
-//            removeView(lastView)
-//            --lastVisiblePosition
-//            recycler.recycleView(lastView)
-//        }
-//    }
 }
