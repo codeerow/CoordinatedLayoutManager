@@ -13,3 +13,14 @@ fun View.moveTo(destinationPosition: Point) {
     offsetLeftAndRight(horizontalDelta)
     offsetTopAndBottom(verticalDelta)
 }
+
+fun View.isOutOfParent(): Boolean {
+    val parentView = parent as? View ?: return false
+    return when {
+        top > parentView.bottom -> true
+        bottom < parentView.top -> true
+        left > parentView.right -> true
+        right < parentView.left -> true
+        else -> false
+    }
+}

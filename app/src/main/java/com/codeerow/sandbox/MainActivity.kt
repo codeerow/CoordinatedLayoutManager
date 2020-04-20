@@ -3,6 +3,7 @@ package com.codeerow.sandbox
 import android.graphics.Point
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.codeerow.sandbox.circle_list.CircleAdapter
 import com.codeerow.sandbox.layout_manager.CoordinatedLayoutManager
 import com.codeerow.sandbox.layout_manager.TableLayoutManager
@@ -17,13 +18,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         recycler.apply {
-            val height = 1920
-            val circleCoordinator = TableCoordinator(
-                width = 700,
-                height = 1000,
-                initialPosition = Point(200, height)
-            )
-            layoutManager = TableLayoutManager(circleCoordinator, itemMargin = 167)
+            layoutManager = TableLayoutManager(itemMargin = 167)
+//            layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = CircleAdapter(List(1) { 1 })
         }
     }

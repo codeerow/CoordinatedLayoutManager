@@ -1,19 +1,19 @@
 package com.codeerow.sandbox.layout_manager
 
 import android.graphics.Point
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.codeerow.sandbox.layout_manager.coordinator.Coordinator
-import com.codeerow.sandbox.layout_manager.utils.moveTo
+import com.codeerow.sandbox.layout_manager.utils.isOutOfParent
 import com.codeerow.sandbox.layout_manager.utils.positionInParent
 
 
-open class CoordinatedLayoutManager(
-    private val coordinator: Coordinator,
+abstract class CoordinatedLayoutManager(
     private val itemMargin: Int
 ) : RecyclerView.LayoutManager() {
+
+    abstract val coordinator: Coordinator
 
     private var firstVisiblePosition: Int = 0
     private var lastVisiblePosition: Int = 0
@@ -52,12 +52,16 @@ open class CoordinatedLayoutManager(
         }
     }
 
+    protected fun View.measure(): Pair<Int, Int> {
+        measureChildWithMargins(this, 0, 0)
+
+        val measuredWidth = getDecoratedMeasuredWidth(this)
+        val measuredHeight = getDecoratedMeasuredHeight(this)
+        return measuredWidth to measuredHeight
+    }
+
     open fun layoutView(view: View, currentPoint: Point) {
-        measureChildWithMargins(view, 0, 0)
-
-        val measuredWidth = getDecoratedMeasuredWidth(view)
-        val measuredHeight = getDecoratedMeasuredHeight(view)
-
+        val (measuredWidth, measuredHeight) = view.measure()
         val left = currentPoint.x - measuredWidth / 2
         val right = currentPoint.x + measuredWidth / 2
         val top = currentPoint.y - measuredHeight / 2
@@ -73,32 +77,35 @@ open class CoordinatedLayoutManager(
     override fun canScrollHorizontally() = false
 
     override fun scrollVerticallyBy(dy: Int, recycler: Recycler, state: RecyclerView.State): Int {
-        return if (childCount == 0) { // we cannot scroll if we don't have views
-            0
-        } else scrollBy(dy, recycler)
+        return if (canScroll()) scrollEachItem(dy, recycler)
+        else 0
     }
 
-    private fun scrollBy(delta: Int, recycler: Recycler): Int = with(coordinator) {
+    private fun scrollEachItem(delta: Int, recycler: Recycler): Int {
         for (i in 0 until childCount) {
             getChildAt(i)?.let { view ->
-                val viewPosition = view.positionInParent()
-                if (!viewPosition.isBoundsReached(delta)) {
-                    val newPosition = viewPosition.shiftPosition(delta)
-                    layoutView(view, newPosition)
+                if (!view.isOutOfParent()) {
+                    scrollItem(view, delta)
+                    if (delta < 0) ++firstVisiblePosition
+                    else --lastVisiblePosition
                 } else {
-                    if (firstVisiblePosition != 0) {
-                        removeView(view)
-                        recycler.recycleView(view)
-                    }
-//                    if (delta < 0) {
-//                        ++firstVisiblePosition
-//                    } else {
-//                        --lastVisiblePosition
-//                    }
+//                    removeView(view)
+//                    recycler.recycleView(view)
+                    /* TODO: add next view at the bottom or the top */
                 }
             }
         }
         return delta
     }
 
+    private fun canScroll(): Boolean {
+        return childCount != 0
+    }
+
+
+    private fun scrollItem(view: View, delta: Int) = with(coordinator) {
+        val viewPosition = view.positionInParent()
+        val newPosition = viewPosition.shiftPosition(delta)
+        layoutView(view, newPosition)
+    }
 }

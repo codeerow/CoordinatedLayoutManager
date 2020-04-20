@@ -12,6 +12,8 @@
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:background="#000"
         tools:itemCount="30"
         tools:listitem="@layout/layout_list_item" />
 </RelativeLayout>

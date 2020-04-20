@@ -113,9 +113,8 @@ class TableCoordinator(
     private fun calculateArcLength(angle: Int) = (PI * radius * (angle / 180.0)).toInt()
 
 
+    /** Bounds is never reached because item disappears only when reach screen bounds */
     override fun Point.isBoundsReached(delta: Int): Boolean {
-        // TODO: implement
         return false
     }
-
 }
