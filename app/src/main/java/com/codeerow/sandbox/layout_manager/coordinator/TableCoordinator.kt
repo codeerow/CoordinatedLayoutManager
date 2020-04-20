@@ -26,12 +26,12 @@ class TableCoordinator(
     private val radius: Int = width / 2
 
 
-    private val leftSideToCirclePoint = Point(initialPosition).apply {
+    private val rightSideToCirclePoint = Point(initialPosition).apply {
         y = y - height + radius
     }
 
-    private val rightSideToCirclePoint = Point(leftSideToCirclePoint).apply {
-        x += width
+    private val leftSideToCirclePoint = Point(rightSideToCirclePoint).apply {
+        x -= width
     }
 
     private val circleCenterPoint = Point(rightSideToCirclePoint).apply {
@@ -69,6 +69,7 @@ class TableCoordinator(
 
     private fun shiftAlongLeftSide(delta: Int) = Point(initialPosition).apply {
         y -= delta
+        x -= width
     }
 
     private fun shiftAlongRightSide(delta: Int) = Point(rightSideToCirclePoint).apply {

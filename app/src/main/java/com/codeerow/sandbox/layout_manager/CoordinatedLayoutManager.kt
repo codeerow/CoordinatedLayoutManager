@@ -98,7 +98,7 @@ abstract class CoordinatedLayoutManager(
         return delta
     }
 
-    private fun canScroll(): Boolean {
+    open fun canScroll(): Boolean {
         return childCount != 0
     }
 

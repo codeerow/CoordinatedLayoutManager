@@ -18,7 +18,7 @@ class TableLayoutManager(
         coordinator = TableCoordinator(
             width = width - itemWidth,
             height = height - itemHeight,
-            initialPosition = Point(itemWidth / 2, height - itemHeight / 2)
+            initialPosition = Point(width - itemWidth / 2, height - itemHeight / 2)
         )
         super.onLayoutChildren(recycler, state)
     }
@@ -26,5 +26,9 @@ class TableLayoutManager(
     override fun layoutView(view: View, currentPoint: Point) = with(coordinator) {
         super.layoutView(view, currentPoint)
         view.rotation = calculateRotation(currentPoint)
+    }
+
+    override fun canScroll(): Boolean {
+        return super.canScroll()
     }
 }
