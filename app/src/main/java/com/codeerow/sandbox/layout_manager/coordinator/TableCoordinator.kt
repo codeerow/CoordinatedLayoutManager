@@ -1,7 +1,6 @@
 package com.codeerow.sandbox.layout_manager.coordinator
 
 import android.graphics.Point
-import android.util.Log
 import com.codeerow.sandbox.layout_manager.utils.angle
 import kotlin.math.*
 
@@ -20,13 +19,16 @@ import kotlin.math.*
 class TableCoordinator(
     private val width: Int,
     private val height: Int,
-    override val initialPosition: Point
+    override val startPosition: Point
 ) : Coordinator {
+
+    override val endPosition = Point(startPosition).apply { x -= width }
+
 
     private val radius: Int = width / 2
 
 
-    private val rightSideToCirclePoint = Point(initialPosition).apply {
+    private val rightSideToCirclePoint = Point(startPosition).apply {
         y = y - height + radius
     }
 
@@ -67,7 +69,7 @@ class TableCoordinator(
         }
     }
 
-    private fun shiftAlongLeftSide(delta: Int) = Point(initialPosition).apply {
+    private fun shiftAlongLeftSide(delta: Int) = Point(startPosition).apply {
         y -= delta
         x -= width
     }
@@ -88,10 +90,10 @@ class TableCoordinator(
     private fun Point.calculateCurrentPath(): Int {
         return when {
             // we on the left side our path consist of initial y - current y
-            isOnLeftSide() -> initialPosition.y - y
+            isOnLeftSide() -> startPosition.y - y
             // we on the right side our path consist of
             // one side + arc path + initial y - current y (because initial y = end y)
-            isOnRightSide() -> oneSidePathLength + arcPathLength + (oneSidePathLength - (initialPosition.y - y))
+            isOnRightSide() -> oneSidePathLength + arcPathLength + (oneSidePathLength - (startPosition.y - y))
             // we on the arc, out path is left side length + arc for curr point
             else -> oneSidePathLength + calculateArcLength(angle(this, circleCenterPoint)) -
                     arcPathLength

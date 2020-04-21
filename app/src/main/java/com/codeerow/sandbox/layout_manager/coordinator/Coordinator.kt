@@ -5,7 +5,8 @@ import android.graphics.Point
 
 interface Coordinator {
 
-    val initialPosition: Point
+    val startPosition: Point
+    val endPosition: Point
 
     fun Point.shiftPosition(delta: Int): Point
 
