@@ -1,6 +1,7 @@
 package com.codeerow.sandbox.layout_manager.utils
 
 import android.graphics.Point
+import android.util.Log
 import android.view.View
 
 /** return center coordinate relative to parent */
@@ -16,11 +17,12 @@ fun View.moveTo(destinationPosition: Point) {
 
 fun View.isOutOfParent(): Boolean {
     val parentView = parent as? View ?: return false
-    return when {
-        top > parentView.bottom -> true
-        bottom < parentView.top -> true
-        left > parentView.right -> true
-        right < parentView.left -> true
+    val r = when {
+        x < 0 -> true
+        y < 0 -> true
+        x > parentView.width -> true
+        y > parentView.height -> true
         else -> false
     }
+    return r
 }
