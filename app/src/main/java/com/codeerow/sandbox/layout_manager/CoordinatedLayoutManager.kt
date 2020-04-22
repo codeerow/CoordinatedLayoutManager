@@ -1,13 +1,14 @@
 package com.codeerow.sandbox.layout_manager
 
 import android.graphics.Point
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.codeerow.sandbox.layout_manager.coordinator.Coordinator
 import com.codeerow.sandbox.layout_manager.utils.isOutOfParent
 import com.codeerow.sandbox.layout_manager.utils.positionInParent
+import kotlin.math.max
+import kotlin.math.min
 
 
 abstract class CoordinatedLayoutManager(
@@ -17,9 +18,6 @@ abstract class CoordinatedLayoutManager(
     abstract val coordinator: Coordinator
 
     private var firstVisiblePosition: Int = 0
-        set(value) {
-            field = value
-        }
     private var lastVisiblePosition: Int = 0
 
 
@@ -80,15 +78,36 @@ abstract class CoordinatedLayoutManager(
 
     override fun canScrollHorizontally() = false
 
-    open fun canScroll(): Boolean {
-        return childCount != 0
-    }
 
     override fun scrollVerticallyBy(dy: Int, recycler: Recycler, state: RecyclerView.State): Int {
-        // TODO: adjust scroll delta
-        return if (canScroll()) scrollEachItem(dy, recycler)
-        else 0
+        if (childCount == 0) return 0
+        val delta = calculateAvailableScroll(dy)
+        scrollEachItem(delta, recycler)
+        return delta
     }
+
+    private fun calculateAvailableScroll(dy: Int): Int {
+        val firstView = getChildAt(0) ?: return dy
+        val lastView = getChildAt(childCount - 1) ?: return dy
+
+        return if (dy < 0) {
+            if (lastVisiblePosition == itemCount) {
+                val offset = height - lastView.bottom
+                max(offset, dy)
+            } else {
+                dy
+            }
+
+        } else {
+            if (firstVisiblePosition == 0) {
+                val offset = firstView.bottom - height
+                min(offset, dy)
+            } else {
+                dy
+            }
+        }
+    }
+
 
     private fun scrollEachItem(delta: Int, recycler: Recycler): Int = with(coordinator) {
         for (i in 0 until childCount) {
@@ -118,7 +137,6 @@ abstract class CoordinatedLayoutManager(
             /** restoring */
             if (delta < 0) {
                 if (lastVisiblePosition < itemCount && lastView.bottom < height) {
-                    Log.d("TEST", "(last) restore at: $lastVisiblePosition")
                     val newView: View = getViewForPosition(lastVisiblePosition)
                     val newCenter = lastView.positionInParent().shiftPosition(itemMargin)
                     addView(newView)
@@ -127,7 +145,6 @@ abstract class CoordinatedLayoutManager(
                 }
             } else {
                 if (firstVisiblePosition > 0 && firstView.bottom < height) {
-                    Log.d("TEST", "(start) restore at: $firstVisiblePosition")
                     val newView: View = getViewForPosition(firstVisiblePosition - 1)
                     val newCenter = firstView.positionInParent().shiftPosition(-itemMargin)
                     addView(newView, 0)

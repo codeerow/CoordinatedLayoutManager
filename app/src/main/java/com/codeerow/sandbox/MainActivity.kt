@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         recycler.apply {
             layoutManager = TableLayoutManager(itemMargin = 167)
 //            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = CircleAdapter(List(5) { 1 })
+            adapter = CircleAdapter(List(25) { 1 })
         }
     }
 }
