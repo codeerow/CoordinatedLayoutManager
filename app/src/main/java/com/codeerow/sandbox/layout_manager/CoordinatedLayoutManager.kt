@@ -90,15 +90,51 @@ abstract class CoordinatedLayoutManager(
         else 0
     }
 
-    private fun scrollEachItem(delta: Int, recycler: Recycler): Int {
+    private fun scrollEachItem(delta: Int, recycler: Recycler): Int = with(coordinator) {
         for (i in 0 until childCount) {
             getChildAt(i)?.let { view ->
                 scrollItem(view, delta)
             }
         }
         with(recycler) {
-            if (canRecycle(delta)) recycleItem(delta)
-            if (canRestore(delta)) restoreItem(delta)
+            val firstView = getChildAt(0) ?: return delta
+            val lastView = getChildAt(childCount - 1) ?: return delta
+
+            /** recycling */
+            if (delta < 0) {
+                if (firstView.isOutOfParent()) {
+                    removeView(firstView)
+                    recycleView(firstView)
+                    ++firstVisiblePosition
+                }
+            } else {
+                if (lastView.isOutOfParent()) {
+                    removeView(lastView)
+                    recycleView(lastView)
+                    --lastVisiblePosition
+                }
+            }
+
+            /** restoring */
+            if (delta < 0) {
+                if (lastVisiblePosition < itemCount && lastView.bottom < height) {
+                    Log.d("TEST", "(last) restore at: $lastVisiblePosition")
+                    val newView: View = getViewForPosition(lastVisiblePosition)
+                    val newCenter = lastView.positionInParent().shiftPosition(itemMargin)
+                    addView(newView)
+                    layoutView(newView, newCenter)
+                    ++lastVisiblePosition
+                }
+            } else {
+                if (firstVisiblePosition > 0 && firstView.bottom < height) {
+                    Log.d("TEST", "(start) restore at: $firstVisiblePosition")
+                    val newView: View = getViewForPosition(firstVisiblePosition - 1)
+                    val newCenter = firstView.positionInParent().shiftPosition(-itemMargin)
+                    addView(newView, 0)
+                    layoutView(newView, newCenter)
+                    --firstVisiblePosition
+                }
+            }
         }
         return delta
     }
@@ -107,68 +143,5 @@ abstract class CoordinatedLayoutManager(
         val viewPosition = view.positionInParent()
         val newPosition = viewPosition.shiftPosition(delta)
         layoutView(view, newPosition)
-    }
-
-
-    /** Recycling */
-    private fun canRecycle(delta: Int): Boolean {
-        return if (delta < 0) canRecycleStart()
-        else canRecycleEnd()
-    }
-
-    private fun canRecycleEnd(): Boolean {
-        return false
-//        return getChildAt(lastVisiblePosition)?.isOutOfParent() == true
-    }
-
-    private fun canRecycleStart(): Boolean {
-        return getChildAt(0)?.isOutOfParent() == true
-    }
-
-
-    private fun Recycler.recycleItem(delta: Int) {
-        Log.d("TEST", "recycle at: $firstVisiblePosition")
-        val view = getChildAt(0) ?: return
-        removeView(view)
-        recycleView(view)
-        /*  if (delta < 0)*/ ++firstVisiblePosition
-//        else ++firstVisiblePosition
-    }
-
-
-    /** Restoring */
-    private fun canRestore(delta: Int): Boolean {
-        return if (delta < 0) canRestoreAtEnd()
-        else canRestoreAtStart()
-    }
-
-    private fun canRestoreAtStart(): Boolean {
-        return firstVisiblePosition > 0 && getChildAt(0)?.bottom!! < height
-    }
-
-    private fun canRestoreAtEnd(): Boolean {
-        /* val lastView = getChildAt(lastVisiblePosition - 1) ?:*/ return false
-        /* return !lastView.isOutOfParent() && lastVisiblePosition + 1 <= childCount*/
-    }
-
-
-    private fun Recycler.restoreItem(delta: Int) = with(coordinator) {
-        val newView: View
-        val newCenter: Point
-        /* if (delta < 0) {
-             val lastView = getChildAt(lastVisiblePosition) ?: return@with
-             ++lastVisiblePosition
-             newView = getViewForPosition(lastVisiblePosition)
-             newCenter = lastView.positionInParent().shiftPosition(itemMargin)
-         } else {*/
-        val firstView = getChildAt(0) ?: return@with
-        firstView.performClick()
-        --firstVisiblePosition
-        Log.d("TEST", "restore at: $firstVisiblePosition")
-        newView = getViewForPosition(firstVisiblePosition)
-        newCenter = firstView.positionInParent().shiftPosition(-itemMargin)
-//        }
-        addView(newView, 0)
-        layoutView(newView, newCenter)
     }
 }
