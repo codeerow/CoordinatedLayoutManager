@@ -1,10 +1,12 @@
 package com.codeerow.sandbox.layout_manager
 
 import android.graphics.Point
+import android.os.Parcelable
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.codeerow.sandbox.layout_manager.coordinator.Coordinator
+import com.codeerow.sandbox.layout_manager.model.ItemsPositionState
 import com.codeerow.sandbox.layout_manager.utils.positionInParent
 
 
@@ -30,12 +32,6 @@ abstract class CoordinatedLayoutManager(
     override fun onLayoutChildren(recycler: Recycler, state: RecyclerView.State) {
         removeAllViews()
         if (itemCount == 0) return
-
-        // TODO: These values should not be set to "0". They should be restored from state
-        // TODO: These values should not be set to "0". They should be restored from state
-
-        lastVisiblePosition = 0
-        firstVisiblePosition = 0
 
         with(coordinator) {
             var currentPoint: Point = startPosition
@@ -108,5 +104,16 @@ abstract class CoordinatedLayoutManager(
         val viewPosition = view.positionInParent()
         val newPosition = viewPosition.shiftPosition(delta)
         layoutView(view, newPosition)
+    }
+
+    override fun onSaveInstanceState(): Parcelable {
+        return ItemsPositionState(firstVisiblePosition, lastVisiblePosition)
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable) {
+        (state as ItemsPositionState).let {
+            firstVisiblePosition = it.firstVisiblePosition
+            lastVisiblePosition = it.firstVisiblePosition
+        }
     }
 }
