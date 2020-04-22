@@ -5,9 +5,9 @@ import android.view.View
 import kotlin.math.atan
 
 
-fun angle(pointA: Point, pointB: Point): Int {
+fun angle(pointA: Point, pointB: Point): Double {
     val angle = Math.toDegrees(atan((pointA.y - pointB.y).toDouble() / (pointA.x - pointB.x)))
-    return if (angle > 0) 180 + angle.toInt() else 360 + angle.toInt()
+    return if (angle > 0) 180 + angle else 360 + angle
 }
 
 fun Point.isOutOfParent(childView: View): Boolean = with(childView) {

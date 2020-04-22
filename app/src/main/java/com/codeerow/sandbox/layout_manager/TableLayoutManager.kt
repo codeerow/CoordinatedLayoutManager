@@ -27,7 +27,7 @@ class TableLayoutManager(private val itemMargin: Int) : CoordinatedLayoutManager
 
     override fun layoutView(view: View, currentPoint: Point) = with(coordinator) {
         super.layoutView(view, currentPoint)
-        view.rotation = calculateRotation(currentPoint)
+        view.rotation = calculateRotation(currentPoint).toFloat()
     }
 
 

@@ -2,7 +2,9 @@ package com.codeerow.sandbox.layout_manager.coordinator
 
 import android.graphics.Point
 import com.codeerow.sandbox.layout_manager.utils.angle
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 /**
@@ -53,8 +55,8 @@ class TableCoordinator(
     private val pathLengthTillArc = oneSidePathLength
     private val pathLengthTillRightSide = oneSidePathLength + arcPathLength
 
-    private fun isOnLeftSide(pathLength: Int): Boolean = pathLength <= pathLengthTillArc
-    private fun isOnRightSide(pathLength: Int): Boolean = pathLength >= pathLengthTillRightSide
+    private fun isOnLeftSide(pathLength: Double): Boolean = pathLength <= pathLengthTillArc
+    private fun isOnRightSide(pathLength: Double): Boolean = pathLength >= pathLengthTillRightSide
 
     private fun Point.isOnLeftSide(): Boolean = this.x == leftSideToCirclePoint.x
     private fun Point.isOnRightSide(): Boolean = this.x == rightSideToCirclePoint.x
@@ -63,8 +65,8 @@ class TableCoordinator(
     override fun Point.shiftPosition(delta: Int): Point {
         val currentPathLength = calculateCurrentPath() - delta
         return when {
-            isOnLeftSide(currentPathLength) -> shiftAlongLeftSide(currentPathLength)
-            isOnRightSide(currentPathLength) -> shiftAlongRightSide(currentPathLength - oneSidePathLength - arcPathLength)
+            isOnLeftSide(currentPathLength) -> shiftAlongLeftSide(currentPathLength.toInt())
+            isOnRightSide(currentPathLength) -> shiftAlongRightSide(currentPathLength.toInt() - oneSidePathLength - arcPathLength)
             else -> shiftAlongCircle(currentPathLength - oneSidePathLength + arcPathLength)
         }
     }
@@ -78,8 +80,8 @@ class TableCoordinator(
         y += delta
     }
 
-    private fun shiftAlongCircle(delta: Int): Point {
-        val newDelta = (delta.toDouble() / radius)
+    private fun shiftAlongCircle(delta: Double): Point {
+        val newDelta = (delta / radius)
 
         val newX = circleCenterPoint.x + radius * cos(newDelta)
         val newY = circleCenterPoint.y + radius * sin(newDelta)
@@ -87,13 +89,13 @@ class TableCoordinator(
     }
 
 
-    private fun Point.calculateCurrentPath(): Int {
+    private fun Point.calculateCurrentPath(): Double {
         return when {
             // we on the left side our path consist of initial y - current y
-            isOnLeftSide() -> startPosition.y - y
+            isOnLeftSide() -> startPosition.y.toDouble() - y
             // we on the right side our path consist of
             // one side + arc path + initial y - current y (because initial y = end y)
-            isOnRightSide() -> oneSidePathLength + arcPathLength + (oneSidePathLength - (startPosition.y - y))
+            isOnRightSide() -> oneSidePathLength.toDouble() + arcPathLength + (oneSidePathLength - (startPosition.y - y))
             // we on the arc, out path is left side length + arc for curr point
             else -> oneSidePathLength + calculateArcLength(angle(this, circleCenterPoint)) -
                     arcPathLength
@@ -101,11 +103,11 @@ class TableCoordinator(
     }
 
 
-    fun calculateRotation(point: Point): Float = with(point) {
+    fun calculateRotation(point: Point): Double = with(point) {
         return when {
-            isOnLeftSide() -> -90f
-            isOnRightSide() -> 90f
-            else -> angle(this, circleCenterPoint) - 270f
+            isOnLeftSide() -> -90.0
+            isOnRightSide() -> 90.0
+            else -> angle(this, circleCenterPoint) - 270.0
         }
     }
 
@@ -113,7 +115,7 @@ class TableCoordinator(
     /**
      * L= πrα / 180°, where a - angle in degrees
      * */
-    private fun calculateArcLength(angle: Int) = (PI * radius * (angle / 180.0)).toInt()
+    private fun calculateArcLength(angle: Double) = (PI * radius * (angle / 180))
 
 
     /** Bounds is never reached because item disappears only when reach screen bounds */
