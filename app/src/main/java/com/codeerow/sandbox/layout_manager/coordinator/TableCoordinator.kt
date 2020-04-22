@@ -44,7 +44,7 @@ class TableCoordinator(
 
 
     private val oneSidePathLength = height - radius
-    private val arcPathLength = (PI * radius).toInt()
+    private val arcPathLength = PI * radius
 
     /**
      * Represent length of the movement trajectory for each of the sides.
@@ -65,19 +65,19 @@ class TableCoordinator(
     override fun Point.shiftPosition(delta: Int): Point {
         val currentPathLength = calculateCurrentPath() - delta
         return when {
-            isOnLeftSide(currentPathLength) -> shiftAlongLeftSide(currentPathLength.toInt())
-            isOnRightSide(currentPathLength) -> shiftAlongRightSide(currentPathLength.toInt() - oneSidePathLength - arcPathLength)
+            isOnLeftSide(currentPathLength) -> shiftAlongLeftSide(currentPathLength)
+            isOnRightSide(currentPathLength) -> shiftAlongRightSide(currentPathLength - oneSidePathLength - arcPathLength)
             else -> shiftAlongCircle(currentPathLength - oneSidePathLength + arcPathLength)
         }
     }
 
-    private fun shiftAlongLeftSide(delta: Int) = Point(startPosition).apply {
-        y -= delta
+    private fun shiftAlongLeftSide(delta: Double) = Point(startPosition).apply {
+        y -= delta.toInt()
         x -= width
     }
 
-    private fun shiftAlongRightSide(delta: Int) = Point(rightSideToCirclePoint).apply {
-        y += delta
+    private fun shiftAlongRightSide(delta: Double) = Point(rightSideToCirclePoint).apply {
+        y += delta.toInt()
     }
 
     private fun shiftAlongCircle(delta: Double): Point {
@@ -115,7 +115,7 @@ class TableCoordinator(
     /**
      * L= πrα / 180°, where a - angle in degrees
      * */
-    private fun calculateArcLength(angle: Double) = (PI * radius * (angle / 180))
+    private fun calculateArcLength(angle: Double) = PI * radius * (angle / 180)
 
 
     /** Bounds is never reached because item disappears only when reach screen bounds */
